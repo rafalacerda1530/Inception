@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  mariadb:
+    build:
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+      args:
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - inception-network
+
+  nginx:
+    depends_on:
+      - wordpress
+    build: ./requirements/nginx
+    image: nginx
+    container_name: nginx
+    networks:
+            - inception-network
+    restart: always
+    ports:
+            - "443:443"
+            - "7000:7000"
+    volumes:
+      - wordpress:/var/www/wordpress
+
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+      args:
+        MYSQL_HOST: ${MYSQL_HOST}
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - mariadb
+    image: wordpress
+    container_name: wordpress
+    restart: always
+    ports:
+      - "9000:9000"
+    networks:
+      - inception-network
+    volumes:
+      - wordpress:/var/www/wordpress
+
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none
+      device: ~/rarodrig/data/mariadb
+      o: bind
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      device: ~/rarodrig/data/wordpress
+      o: bind
+
+networks:
+    inception-network:
+        driver: bridge
