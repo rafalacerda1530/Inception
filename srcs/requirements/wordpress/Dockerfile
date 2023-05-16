@@ -1,5 +1,6 @@
-FROM debian:latest
+FROM debian:buster
 
+# argumentos das vaariaveis de ambiente
 ARG MYSQL_HOST
 ARG MYSQL_DATABASE
 ARG MYSQL_USER
@@ -25,7 +26,7 @@ RUN wget -P /tmp https://wordpress.org/latest.zip \
 	&& rm /tmp/latest.zip
 
 # Copia a file .conf para o diretório html
-COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/
+COPY ./conf/www.conf /etc/php/7.3/fpm/pool.d/
 
 # Seta o ownership e permissões para as files do WordPress
 RUN chown -R www-data:www-data /var/www/wordpress \
@@ -37,9 +38,9 @@ RUN mkdir /run/php
 # Seta o diretório html como workdir
 WORKDIR /var/www/wordpress/
 
-RUN sed -i 's/listen\s*=\s*.*/listen = 0.0.0.0:9000/g' /etc/php/7.4/fpm/pool.d/www.conf
+RUN sed -i 's/listen\s*=\s*.*/listen = 0.0.0.0:9000/g' /etc/php/7.3/fpm/pool.d/www.conf
 
-# Configura o wordpress
+# Configura o wordpress copiando alguns arquivos e alterando as variaveis do banco de dados no arquivo wp-config (linhas 47 a 50)
 RUN cp wp-config-sample.php wp-config.php && \
 	sleep 5s && \
 	mv wp-config-sample.php /var/www/wordpress/wp-config.php && \
@@ -54,4 +55,4 @@ RUN cp wp-config-sample.php wp-config.php && \
 EXPOSE 9000
 
 # Inicia php-fpm
-CMD ["php-fpm7.4", "-F"]
+CMD ["php-fpm7.3", "-F"]

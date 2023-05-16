@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:buster
  
 RUN		apt-get update
 RUN		apt-get install -y nginx \
@@ -23,9 +23,11 @@ COPY ./conf/nginx.conf /etc/nginx/conf.d/default.conf
 RUN mkdir /var/www/wordpress
 
 # Copia os arquivos dos sites para a pasta
-COPY ./tools/index.html /var/www/wordpress
+COPY ./tools/* /var/www/html
 
 # Utiliza a porta 443
 EXPOSE 443 7000
  
+
+# Comando incial padrão
 CMD ["nginx", "-g", "daemon off;"]
